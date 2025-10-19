@@ -23,10 +23,72 @@
     p {
       font-size: 1.2em;
     }
+    #chat {
+      width: 80%;
+      max-width: 500px;
+      background: white;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    input {
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+    }
+    button {
+      padding: 10px;
+      border: none;
+      border-radius: 10px;
+      background: #4a90e2;
+      color: white;
+      cursor: pointer;
+    }
+    .response {
+      background: #f0f0f0;
+      border-radius: 10px;
+      padding: 10px;
+    }
   </style>
 </head>
 <body>
   <h1>SmileCraft AI</h1>
   <p>Created by Smisek and Best ✨</p>
+
+  <div id="chat">
+    <input id="userInput" type="text" placeholder="Zeptej se AI..." />
+    <button onclick="sendMessage()">Odeslat</button>
+    <div id="response" class="response"></div>
+  </div>
+
+  <script>
+    const API_KEY = "sk-...1wwA"; // ← Sem přijde tvůj OpenAI API klíč
+
+    async function sendMessage() {
+      const input = document.getElementById("userInput").value;
+      const responseDiv = document.getElementById("response");
+
+      responseDiv.innerText = "⏳ Přemýšlím...";
+
+      const response = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${API_KEY}`
+        },
+        body: JSON.stringify({
+          model: "gpt-4o-mini",
+          messages: [{ role: "user", content: input }]
+        })
+      });
+
+      const data = await response.json();
+      responseDiv.innerText = data.choices?.[0]?.message?.content || "⚠️ Chyba";
+    }
+  </script>
 </body>
 </html>
