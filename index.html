@@ -65,29 +65,21 @@
     <div id="response" class="response"></div>
   </div>
 
-  <script>
-    const API_KEY = "sk-...1wwA"; // ← Sem přijde tvůj OpenAI API klíč
-
+   <script>
     async function sendMessage() {
       const input = document.getElementById("userInput").value;
       const responseDiv = document.getElementById("response");
 
       responseDiv.innerText = "⏳ Přemýšlím...";
 
-      const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      const response = await fetch("/api/ai", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${API_KEY}`
-        },
-        body: JSON.stringify({
-          model: "gpt-4o-mini",
-          messages: [{ role: "user", content: input }]
-        })
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: input })
       });
 
       const data = await response.json();
-      responseDiv.innerText = data.choices?.[0]?.message?.content || "⚠️ Chyba";
+      responseDiv.innerText = data.reply || "⚠️ Chyba";
     }
   </script>
 </body>
