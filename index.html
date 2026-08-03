@@ -1,85 +1,170 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="cs">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SmileCraft AI</title>
   <style>
+    /* Reset základního nastavení pro maximální rychlost vykreslení */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
     body {
-      font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #a1c4fd, #c2e9fb);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: radial-gradient(circle at center, #bfbfc3 0%, #828286 100%);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       height: 100vh;
-      margin: 0;
-      color: #333;
+      color: #000000;
+      overflow: hidden;
     }
+
     h1 {
-      font-size: 3em;
-      margin-bottom: 10px;
+      font-size: 3.2em;
+      font-weight: 700;
+      margin-bottom: 8px;
+      letter-spacing: -0.5px;
     }
+
     p {
-      font-size: 1.2em;
+      font-size: 1.1em;
+      color: #2c2c2c;
+      margin-bottom: 25px;
+      font-weight: 400;
     }
-    #chat {
-      width: 80%;
-      max-width: 500px;
-      background: white;
-      border-radius: 15px;
-      padding: 20px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+
+    /* Optimalizované hlavní okno z fotky */
+    #chat-container {
+      width: 90%;
+      max-width: 580px;
+      background: rgba(255, 255, 255, 0.4);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: 20px;
+      padding: 16px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15), 
+                  inset 0 1px 1px rgba(255, 255, 255, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.3);
       display: flex;
       flex-direction: column;
-      gap: 10px;
-      margin-top: 20px;
+      gap: 12px;
     }
+
+    /* Stylové vstupní pole jako na obrázku */
     input {
-      padding: 10px;
-      border-radius: 10px;
-      border: 1px solid #ccc;
+      width: 100%;
+      padding: 14px 16px;
+      border-radius: 12px;
+      border: 1px solid rgba(0, 0, 0, 0.15);
+      background: rgba(255, 255, 255, 0.5);
+      font-size: 1.05em;
+      color: #1a1a1a;
+      outline: none;
+      transition: background 0.2s, border-color 0.2s;
     }
+
+    input:focus {
+      background: rgba(255, 255, 255, 0.8);
+      border-color: rgba(0, 0, 0, 0.3);
+    }
+
+    input::placeholder {
+      color: #6e6e73;
+    }
+
+    /* Černé zaoblené tlačítko přesně podle předlohy */
     button {
-      padding: 10px;
+      width: 100%;
+      padding: 14px;
       border: none;
-      border-radius: 10px;
-      background: #4a90e2;
-      color: white;
+      border-radius: 12px;
+      background: #111111;
+      color: #ffffff;
+      font-size: 1em;
+      font-weight: 500;
       cursor: pointer;
+      transition: background 0.15s ease, transform 0.1s ease;
     }
-    .response {
-      background: #f0f0f0;
-      border-radius: 10px;
-      padding: 10px;
+
+    button:hover {
+      background: #222222;
+    }
+
+    button:active {
+      transform: scale(0.995);
+    }
+
+    /* Schované a optimalizované okno pro odpověď AI */
+    .response-box {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.7);
+      border-radius: 12px;
+      padding: 14px;
+      font-size: 1em;
+      line-height: 1.5;
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      display: none; /* Ukáže se, až když AI začne odpovídat */
+      max-height: 250px;
+      overflow-y: auto;
     }
   </style>
 </head>
 <body>
-  <h1>SmileCraft AI</h1>
-  <p>Created by Smisek and Best ✨</p>
 
-  <div id="chat">
-    <input id="userInput" type="text" placeholder="Zeptej se AI..." />
-    <button onclick="sendMessage()">Odeslat</button>
-    <div id="response" class="response"></div>
+  <h1>SmileCraft AI</h1>
+  <p>Created by Smisek and Best</p>
+
+  <div id="chat-container">
+    <input id="userInput" type="text" placeholder="Zeptej se AI..." autocomplete="off" />
+    <button id="sendBtn" onclick="sendMessage()">Odeslat</button>
+    <div id="response" class="response-box"></div>
   </div>
 
-   <script>
+  <script>
+    // Výkonnostní optimalizace: Odeslání dotazu stiskem klávesy Enter
+    document.getElementById("userInput").addEventListener("keydown", function(event) {
+      if (event.key === "Enter") {
+        sendMessage();
+      }
+    });
+
     async function sendMessage() {
-      const input = document.getElementById("userInput").value;
+      const inputField = document.getElementById("userInput");
+      const button = document.getElementById("sendBtn");
       const responseDiv = document.getElementById("response");
+      const prompt = inputField.value.trim();
 
+      if (!prompt) return;
+
+      // Vizuální příprava rozhraní pro generování
+      responseDiv.style.display = "block";
       responseDiv.innerText = "⏳ Přemýšlím...";
+      inputField.disabled = true;
+      button.disabled = true;
 
-      const response = await fetch("/api/ai", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: input })
-      });
+      try {
+        const response = await fetch("/api/ai", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prompt: prompt })
+        });
 
-      const data = await response.json();
-      responseDiv.innerText = data.reply || "⚠️ Chyba";
+        const data = await response.json();
+        responseDiv.innerText = data.reply || "⚠️ Žádná odpověď z offline serveru.";
+      } catch (err) {
+        responseDiv.innerText = "⚠️ Chyba spojení. Zkontrolujte, zda běží Ollama.";
+      } finally {
+        // Uvolnění rozhraní pro další dotaz
+        inputField.disabled = false;
+        button.disabled = false;
+        inputField.value = "";
+        inputField.focus();
+      }
     }
   </script>
 </body>
